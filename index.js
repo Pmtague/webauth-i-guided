@@ -19,7 +19,7 @@ server.get('/', (req, res) => {
 server.post('/api/register', (req, res) => {
   let { username, password } = req.body;
 
-  // const hash = 
+  const hash = bcrypt.hashSync(password, 8); 
 
   Users.add(user)
     .then(saved => {
@@ -36,10 +36,10 @@ server.post('/api/login', (req, res) => {
   Users.findBy({ username })
     .first()
     .then(user => {
-      if (user) {
-        res.status(200).json({ message: `Welcome ${user.username}!` });
-      } else {
+      if (!user || !bcrypt.compareSync(password, user.password)) {
         res.status(401).json({ message: 'Invalid Credentials' });
+      } else {
+        res.status(200).json({ message: `Welcome ${user.username}!` });
       }
     })
     .catch(error => {
